@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
-import Navbar from "./components/Navbar";
+import Navigationbar from "./components/Navbar";
 import About from "./pages/About";
 import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
@@ -12,7 +12,7 @@ import RegistrationPage from "./pages/RegistrationPage";
 function App() {
   return (
     <div>
-      <Navbar />
+      <Navigationbar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />

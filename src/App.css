@@ -1,38 +1,131 @@
-.App {
-  text-align: center;
+.container {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  margin-top: 200px;
+  background-color: white;
+  padding-bottom: 30px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.header {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 9px;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.text {
+  color: gray;
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.underline {
+  width: 61px;
+  height: 6px;
+  background-color: orange;
+  border-radius: 9px;
+}
+
+.inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-top: 30px;
+}
+
+.input {
+  width: 480px;
+  height: 80px;
+  margin: auto;
+  align-items: center;
+  display: flex;
+  background: white;
+  border-radius: 6px;
+}
+
+.input input {
+  width: 400px;
+  height: 50px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: gray;
+  font-size: 19px;
+}
+
+.forgot-password {
+  align-items: center;
+  padding-left: 62px;
+  margin-top: 27px auto 0;
+  color: gray;
+  text-align: center;
+  font-size: 18px;
+}
+
+.forgot-password span {
+  color: orange;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit-container {
+  display: flex;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin: 60px auto;
+}
+
+.submit {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 220px;
+  height: 59px;
+  background-color: orange;
+  border-radius: 50px;
   color: white;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
-.App-link {
-  color: #61dafb;
+.navbar-shell {
+  padding: 16px;
+  background: transparent;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.app-navbar {
+  background: #23272b;  
+  border-radius: 8px;
+  padding: 10px 16px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+  sticky: top;
+}
+
+.app-navbar .navbar-brand {
+  color: #e7ecef;
+  font-weight: 700;
+  letter-spacing: .4px;
+}
+
+.app-navbar .nav-link {
+  color: #c7ccd1;
+  text-decoration: none;
+}
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active {
+  color: #ffffff;
+}
+
+.nav-pill {
+  padding: 6px 16px !important;
+  border-radius: 999px;
+  background: #2b95b6;
+  color: #fff !important;
+  font-weight: 600;
+}
+.nav-pill:hover {
+  background: #2586a4;
 }
