@@ -7,7 +7,8 @@ import Dashboard from "./pages/Dashboard";
 import Home from "./pages/Home";
 import LoginPage from "./pages/LoginPage";
 import RecipeGenerator from "./pages/RecipeGenerator";
-import RegistrationPage from "./pages/RegistrationPage";
+import SignupPage from "./pages/SignupPage";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -18,9 +19,10 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/registration" element={<RegistrationPage />} />
         <Route path="/recipe-generator" element={<RecipeGenerator />} />
+        <Route path="/signup" element={<SignupPage />} />
       </Routes>
+      <Footer />
     </div>
   );
 }
