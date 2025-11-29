@@ -1,11 +1,13 @@
 from flask import Flask
 from flask_cors import CORS
 from routes.auth_routes import auth
+from routes.ingredient_routes import ingredients_bp
 
 app = Flask(__name__)
 CORS(app, origins=["http://localhost:5173", "http://localhost:3000"])
 
 app.register_blueprint(auth, url_prefix="/api")
+app.register_blueprint(ingredients_bp, url_prefix="/api")
 
 @app.get("/api/healthz")
 def health_check():
