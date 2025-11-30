@@ -4,9 +4,10 @@ export default function About() {
   return (
     <div style={{ maxWidth: 860, margin: "32px auto", padding: "0 16px" }}>
       <h1>About ChompList</h1>
-      <p style={{ color: "#555" }}>
-        ChompList helps students turn pantry ingredients into quick, budget-friendly meals.
-        The MVP is a clean ingredient input, basic matching, and a results list.
+      <p style={{ color: "black" }}>
+        ChompList helps students turn pantry ingredients into quick,
+        budget-friendly meals. The MVP is a clean ingredient input, basic
+        matching, and a results list.
       </p>
 
       <h2 style={{ marginTop: 24 }}>Current Scope (Sprint 1)</h2>

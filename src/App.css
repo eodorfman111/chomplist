@@ -1,10 +1,24 @@
+body {
+  min-height: 100vh;
+  width: 100%;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+}
+
 .container {
   display: flex;
   flex-direction: column;
   margin: auto;
-  margin-top: 200px;
-  background-color: white;
-  padding-bottom: 30px;
+  margin-top: 100px;
+  margin-bottom: 300px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  max-width: 600px;
+  padding: 40px 30px 30px;
 }
 
 .header {
@@ -17,9 +31,22 @@
 }
 
 .text {
-  color: gray;
+  color: black;
   font-size: 48px;
   font-weight: 700;
+}
+
+.error-message {
+  color: red;
+  font-size: 16px;
+  justify-content: center;
+
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .underline {
@@ -28,14 +55,12 @@
   background-color: orange;
   border-radius: 9px;
 }
-
 .inputs {
   display: flex;
   flex-direction: column;
   gap: 25px;
   margin-top: 30px;
 }
-
 .input {
   width: 480px;
   height: 80px;
@@ -44,6 +69,14 @@
   display: flex;
   background: white;
   border-radius: 6px;
+  padding-left: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.input:focus-within {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
 .input input {
@@ -57,12 +90,15 @@
 }
 
 .forgot-password {
-  align-items: center;
-  padding-left: 62px;
   margin-top: 27px auto 0;
-  color: gray;
-  text-align: center;
+  color: rgb(36, 36, 214);
+  text-decoration: underline;
   font-size: 18px;
+}
+
+.switch-link {
+  color: rgb(36, 36, 214);
+  text-decoration: underline;
 }
 
 .forgot-password span {
@@ -74,14 +110,14 @@
 .submit-container {
   display: flex;
   justify-content: center;
-  margin: 60px auto;
+  margin: 15px auto;
 }
 
-.submit {
+.Login, .Signup {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 220px;
+  width: 200px;
   height: 59px;
   background-color: orange;
   border-radius: 50px;
@@ -89,30 +125,48 @@
   font-size: 20px;
   font-weight: 600;
   cursor: pointer;
+  margin: 0 15px;
+  transition: all 0.3s ease;
 }
 
-.navbar-shell {
-  padding: 16px;
-  background: transparent;
+.Login:hover {
+  background-color: #ff8c00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 119, 0, 0.4);
+}
+
+.Signup:hover {
+  background-color: #ff8c00;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 119, 0, 0.4);
 }
 
 .app-navbar {
-  background: #23272b;  
-  border-radius: 8px;
-  padding: 10px 16px;
-  box-shadow: 0 8px 22px rgba(0,0,0,0.35);
-  sticky: top;
+  background: #23272b;
+  padding: 20px 18px;
+  position: sticky;
 }
 
 .app-navbar .navbar-brand {
   color: #e7ecef;
-  font-weight: 700;
-  letter-spacing: .4px;
+  font-size: 24px;
+  font-weight: bold;
+  display: inline-flex;    
+  align-items: center;      
+  gap: 10px;               
+  text-decoration: none;
+}
+
+.logo-img {
+  display: block;           
+  width: 60px;
+  height: 60px;
+  margin: 0; 
 }
 
 .app-navbar .nav-link {
   color: #c7ccd1;
-  text-decoration: none;
+  font-size: 18px;
 }
 .app-navbar .nav-link:hover,
 .app-navbar .nav-link.active {
@@ -120,12 +174,118 @@
 }
 
 .nav-pill {
-  padding: 6px 16px !important;
+  padding: 6px 16px;
   border-radius: 999px;
   background: #2b95b6;
-  color: #fff !important;
-  font-weight: 600;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
 }
 .nav-pill:hover {
   background: #2586a4;
+}
+
+.footer {
+  background: #23272b;
+  color: #e7ecef;
+  padding: 40px 20px 20px;
+  margin-top: auto;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.footer-text {
+  color: #c7ccd1;
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 5px 0;
+}
+
+.footer-text :hover {
+  color: #ffffff;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: #c7ccd1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, #002efd 0%, #ff7700 100%);
+}
+
+.main-content {
+  flex: 1;
+  padding-bottom: 200px;
+}
+
+.github-links {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.github-link {
+  color: #c7ccd1;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.github-link:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .github-links {
+    justify-content: center;
+  }
 }

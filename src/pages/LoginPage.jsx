@@ -1,81 +1,127 @@
-import React, { useState } from "react";
+import React from "react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-export default function LoginPage() {
-  const [mode, setMode] = useState("Login"); // "Login" | "Signup"
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5001";
+
+const LoginPage = () => {
   const [email, setEmail] = useState("");
-  const [pwd, setPwd] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function submit() {
-    if (!email.trim() || !pwd.trim()) {
-      alert("Please enter email and password.");
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!email || !password) {
+      setError("Please enter both email and password.");
       return;
     }
-    // fake auth token for now
-    localStorage.setItem("chomplist_token", JSON.stringify({ email, t: Date.now() }));
-    navigate("/dashboard");
-  }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/api/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: email, password }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        setError(
+          data.error || data.message || "Login failed. Please try again."
+        );
+        setLoading(false);
+        return;
+      }
+
+      const userToStore = data.user ?? email;
+      localStorage.setItem(
+        "chomplist_user",
+        JSON.stringify({ username: username, email: email })
+      );
+      window.dispatchEvent(new Event("chomplist_user_changed"));
+      setLoading(false);
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An error occurred. Please try again.");
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="container">
-      <div className="header">
-        <div className="text">{mode}</div>
-        <div className="underline" />
-      </div>
-
-      <div className="inputs" style={{ alignItems: "center" }}>
-        {mode === "Signup" && (
-          <div className="input">
-            <input type="text" placeholder="Name / Username" />
+    <div className="body">
+      <div className="container">
+        <form className="login-form" onSubmit={handleLogin}>
+          <div className="header">
+            <div className="text">Login</div>
+            <div className="underline"></div>
           </div>
-        )}
-        <div className="input">
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-          />
-        </div>
-        <div className="input">
-          <input
-            type="password"
-            placeholder="Password"
-            value={pwd}
-            onChange={e => setPwd(e.target.value)}
-          />
-        </div>
-      </div>
-
-      {mode === "Login" && (
-        <div className="forgot-password">
-          <span role="button" onClick={() => alert("Password reset coming soon.")}>
-            Forgot password?
-          </span>
-        </div>
-      )}
-
-      <div className="submit-container">
-        <div
-          className={mode === "Login" ? "submit gray" : "submit"}
-          onClick={() => setMode("Signup")}
-        >
-          Sign Up
-        </div>
-        <div
-          className={mode === "Signup" ? "submit gray" : "submit"}
-          onClick={() => setMode("Login")}
-        >
-          Login
-        </div>
-      </div>
-
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <button className="nav-pill" onClick={submit}>
-          {mode === "Login" ? "Continue" : "Create Account"}
-        </button>
+          <div className="inputs">
+            <div className="input">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+              />
+            </div>
+            <div className="input">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                autoComplete="current-password"
+              />
+            </div>
+          </div>
+          <div className="button">
+            <p>
+              Don't have an account?{" "}
+              <Link to="/signup" className="switch-link">
+                Signup here
+              </Link>
+            </p>
+          </div>
+          <div className="forgot-password">
+            <Link to="/forgot">Forgot your password?</Link>
+          </div>
+          <div className="submit-container">
+            <div>{error && <div className="error-message">{error}</div>}</div>
+            <div>
+              <button
+                type="submit"
+                className="Login"
+                disabled={loading}
+                aria-busy={loading}
+              >
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );
-}
+};
+
+export default LoginPage;
