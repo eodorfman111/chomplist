@@ -1,186 +1,142 @@
 import sqlite3
-import csv
-import os
-from werkzeug.security import generate_password_hash, check_password_hash
+from pathlib import Path
+import pandas as pd
 
-BASE_DIR = os.path.dirname(__file__)
-DB_PATH = os.path.join(BASE_DIR, "recipes.db")
-CSV_PATH = os.path.join(BASE_DIR, "recipes.csv")
 
-#creates the database
-def create_database():
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
+def create_database(db_path: Path):
+    """Create the SQLite DB and a basic recipes table if not exists."""
+    db_path = Path(db_path)
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
-    cur.execute("""
+    cursor.execute(
+        """
         CREATE TABLE IF NOT EXISTS recipes (
             id INTEGER PRIMARY KEY,
             name TEXT,
             ingredients TEXT,
             instructions TEXT
-        )
-    """)
-
-    # users table for simple authentication
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY,
-            username TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
-
-    # favorites table: links users to recipes
-    cur.execute("""
-        CREATE TABLE IF NOT EXISTS favorites (
-            id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            recipe_id INTEGER NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(user_id, recipe_id),
-            FOREIGN KEY(user_id) REFERENCES users(id),
-            FOREIGN KEY(recipe_id) REFERENCES recipes(id)
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-#inserts CSV data into the database
-def insert_csv_data():
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-
-    with open(CSV_PATH, "r", newline="", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            ingredients = row["Ingredients"].lower()
-            cur.execute(
-                """
-                INSERT OR IGNORE INTO recipes (name, ingredients, instructions)
-                VALUES (?, ?, ?)
-                """,
-                (row["Title"], ingredients, row["Instructions"]),
-            )
-
-    conn.commit()
-    conn.close()
-
-#Backend stuff to make user
-
-def create_user(username: str, password: str):
-    #Create a new user with a hashed password. 
-    #Tries to return new ID, though if error return that instead
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    password_hash = generate_password_hash(password)
-    try:
-        cur.execute(
-            """
-            INSERT INTO users (username, password_hash)
-            VALUES (?, ?)
-            """,
-            (username, password_hash),
-        )
-        conn.commit()
-        user_id = cur.lastrowid
-    except sqlite3.IntegrityError:
-        user_id = None
-    conn.close()
-    return user_id
-
-
-def get_user_by_username(username: str):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT id, username, password_hash, created_at FROM users WHERE username = ?",
-        (username,)
+        );
+        """
     )
-    row = cur.fetchone()
+
+    conn.commit()
     conn.close()
-    if not row:
+
+
+def insert_csv_data(db_path: Path, csv_path: Path):
+    """Insert CSV data into DB only if table is empty."""
+    db_path = Path(db_path)
+    csv_path = Path(csv_path)
+
+    if not csv_path.exists():
+        print(f"CSV not found at {csv_path}, skipping insert.")
+        return
+
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+
+    # check if table has any rows already
+    cursor.execute("SELECT COUNT(*) FROM recipes;")
+    (count,) = cursor.fetchone()
+    if count > 0:
+        print("recipes table already has data, skipping CSV import.")
+        conn.close()
+        return
+
+    df = pd.read_csv(csv_path)
+
+    # assume df has columns: id, name, ingredients, instructions
+    for _, row in df.iterrows():
+        cursor.execute(
+            """
+            INSERT INTO recipes (id, name, ingredients, instructions)
+            VALUES (?, ?, ?, ?)
+            """,
+            (
+                int(row["id"]),
+                row.get("name", ""),
+                row.get("ingredients", ""),
+                row.get("instructions", ""),
+            ),
+        )
+
+    conn.commit()
+    conn.close()
+    print("CSV data imported successfully.")
+
+
+def get_all_recipes(db_path: Path):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, ingredients, instructions FROM recipes;")
+    rows = cursor.fetchall()
+    conn.close()
+
+    return [
+        {
+            "id": r[0],
+            "name": r[1],
+            "ingredients": r[2],
+            "instructions": r[3],
+        }
+        for r in rows
+    ]
+
+
+def get_recipe_by_id(db_path: Path, recipe_id: int):
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT id, name, ingredients, instructions FROM recipes WHERE id = ?;",
+        (recipe_id,),
+    )
+    row = cursor.fetchone()
+    conn.close()
+
+    if row is None:
         return None
+
     return {
         "id": row[0],
-        "username": row[1],
-        "password_hash": row[2],
-        "created_at": row[3],
+        "name": row[1],
+        "ingredients": row[2],
+        "instructions": row[3],
     }
 
 
-def verify_user(username: str, password: str) -> bool:
-    user = get_user_by_username(username)
-    if not user:
-        return False
-    return check_password_hash(user["password_hash"], password)
+def search_recipes_by_ingredients(db_path: Path, ingredients: list[str]):
+    """Very simple search: all ingredients must be substring-matched in ingredients column."""
+    if not ingredients:
+        return []
 
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
 
-def add_favorite(user_id: int, recipe_id: int):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "INSERT INTO favorites (user_id, recipe_id) VALUES (?, ?)",
-            (user_id, recipe_id),
-        )
-        conn.commit()
-        fav_id = cur.lastrowid
-    except sqlite3.IntegrityError:
-        fav_id = None
+    # build LIKE clauses
+    clauses = []
+    params = []
+    for ing in ingredients:
+        clauses.append("ingredients LIKE ?")
+        params.append(f"%{ing}%")
+
+    where_clause = " AND ".join(clauses)
+    query = f"""
+        SELECT id, name, ingredients, instructions
+        FROM recipes
+        WHERE {where_clause};
+    """
+
+    cursor.execute(query, params)
+    rows = cursor.fetchall()
     conn.close()
-    return fav_id
 
-
-def remove_favorite_by_id(fav_id: int) -> bool:
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM favorites WHERE id = ?", (fav_id,))
-    changed = cur.rowcount
-    conn.commit()
-    conn.close()
-    return changed > 0
-
-
-def remove_favorite(user_id: int, recipe_id: int) -> bool:
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute("DELETE FROM favorites WHERE user_id = ? AND recipe_id = ?", (user_id, recipe_id))
-    changed = cur.rowcount
-    conn.commit()
-    conn.close()
-    return changed > 0
-
-
-def get_favorites_by_user(user_id: int, limit: int = 50, offset: int = 0):
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        """
-        SELECT f.id, f.recipe_id, r.name, r.ingredients, r.instructions, f.created_at
-        FROM favorites f
-        JOIN recipes r ON r.id = f.recipe_id
-        WHERE f.user_id = ?
-        ORDER BY f.created_at DESC
-        LIMIT ? OFFSET ?
-        """,
-        (user_id, limit, offset),
-    )
-    rows = cur.fetchall()
-    conn.close()
     return [
         {
-            "favorite_id": row[0],
-            "recipe_id": row[1],
-            "title": row[2],
-            "ingredients": row[3],
-            "instructions": row[4],
-            "created_at": row[5],
+            "id": r[0],
+            "name": r[1],
+            "ingredients": r[2],
+            "instructions": r[3],
         }
-        for row in rows
+        for r in rows
     ]
-
-def get_connection():
-    return sqlite3.connect(DB_PATH)
-
