@@ -1,28 +1,77 @@
-from flask import Flask
+import os
+from flask import Flask, jsonify, request
 from flask_cors import CORS
-from routes.auth_routes import auth
-from routes.ingredient_routes import ingredients_bp
-from routes.suggestions_routes import suggestions_bp
+from pathlib import Path
 
-from routes.favorites_routes import favorites_bp
-from db import create_database, insert_csv_data
+from db import (
+    create_database,
+    insert_csv_data,
+    get_all_recipes,
+    get_recipe_by_id,
+    search_recipes_by_ingredients,
+)
 
-app = Flask(__name__)
-CORS(app, origins=["http://localhost:5173", "http://localhost:3000"])
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "recipes.db"
+CSV_PATH = BASE_DIR / "recipes.csv"   # adjust if your CSV lives elsewhere
 
-create_database()
-insert_csv_data()
+def create_app():
+    app = Flask(__name__)
 
-app.register_blueprint(auth, url_prefix="/api")
-app.register_blueprint(ingredients_bp, url_prefix="/api")
-app.register_blueprint(suggestions_bp, url_prefix="/api")
+    # CORS for Vite dev server + generic local origins
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]}},
+    )
 
+    # --- DB init on first run only ---
+    if not DB_PATH.exists():
+        print("Database not found, creating and loading from CSV...")
+        create_database(DB_PATH)
+        if CSV_PATH.exists():
+            insert_csv_data(DB_PATH, CSV_PATH)
+        else:
+            print(f"WARNING: CSV file not found at {CSV_PATH}, database will be empty.")
+    else:
+        print("Database already exists, skipping creation and CSV import.")
 
-app.register_blueprint(favorites_bp, url_prefix="/api")
+    # ---------- ROUTES ----------
 
-@app.get("/api/healthz")
-def health_check():
-    return {"ok": True}
+    @app.route("/api/health", methods=["GET"])
+    def health():
+        return jsonify({"status": "ok"}), 200
+
+    @app.route("/api/recipes", methods=["GET"])
+    def list_recipes():
+        recipes = get_all_recipes(DB_PATH)
+        return jsonify(recipes), 200
+
+    @app.route("/api/recipes/<int:recipe_id>", methods=["GET"])
+    def recipe_detail(recipe_id):
+        recipe = get_recipe_by_id(DB_PATH, recipe_id)
+        if recipe is None:
+            return jsonify({"error": "Recipe not found"}), 404
+        return jsonify(recipe), 200
+
+    @app.route("/api/recipes/search", methods=["POST"])
+    def search_recipes():
+        data = request.get_json(silent=True) or {}
+        ingredients = data.get("ingredients", [])
+        if not isinstance(ingredients, list):
+            return jsonify({"error": "ingredients must be a list"}), 400
+
+        recipes = search_recipes_by_ingredients(DB_PATH, ingredients)
+        return jsonify(recipes), 200
+
+    return app
+
 
 if __name__ == "__main__":
-    app.run(port=5001, debug=True)
+    app = create_app()
+    # host 0.0.0.0 so it works in Docker/WSL if you do that later
+    app.run(host="0.0.0.0", port=5001, debug=True)
