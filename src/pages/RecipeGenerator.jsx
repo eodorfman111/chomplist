@@ -150,8 +150,8 @@ export default function RecipeGenerator() {
       }}
     >
       <div style={{ maxWidth: 820, margin: "0 auto" }}>
-        <h1 style={{ color: "#fff", textAlign: "center" }}>Recipe Generator</h1>
-        <p style={{ color: "#fff", textAlign: "center" }}>
+        <h1 className="top-header">Recipe Generator</h1>
+        <p className="small-text" style={{ marginBottom: 24 }}>
           Type an ingredient and press Enter. Add a few, then see simple
           suggestions.
         </p>
@@ -215,7 +215,7 @@ export default function RecipeGenerator() {
         </div>
 
         <div style={{ marginTop: 24 }}>
-          <h2 style={{ margin: "0 0 12px" }}>Suggestions</h2>
+          <h2 style={{ color: "white", fontSize: "36px" }}>Suggestions</h2>
 
           {error && (
             <div style={{ ...empty, borderColor: "#f44336", color: "#c62828" }}>
