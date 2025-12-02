@@ -30,10 +30,22 @@ body {
   margin-top: 30px;
 }
 
+.top-header {
+  color: white;
+  font-size: 48px;
+  font-weight: 700;
+}
+
 .text {
   color: black;
   font-size: 48px;
   font-weight: 700;
+}
+
+.small-text {
+  color: white;
+  font-size: 20px;
+  margin-top: 10px;
 }
 
 .error-message {

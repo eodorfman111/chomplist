@@ -1,14 +1,17 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
+import "../App.css";
 
 export default function Home() {
   return (
     <div className="body">
       <div>
-        <h1 className="top-header" style={{ marginTop: 40 }}>
+        <h1 className="top-header" style={{ marginTop: 40 }} color="white">
           Welcome to ChompList
         </h1>
-        <p>Enter in ingredients and recieve recipes now!</p>
+        <p className="small-text">
+          Enter in ingredients and recieve recipes now!
+        </p>
         <div
           style={{
             display: "grid",
@@ -22,7 +25,7 @@ export default function Home() {
           <div style={card}>
             <h3 style={h3}>Recipe Generator</h3>
             <p style={p}>
-              Type ingredients and get simple ideas to cook tonight.
+              Type ingredients and get simple ideas to cook tonight!
             </p>
             <NavLink className="nav-pill" to="/recipe-generator">
               Try it
@@ -30,14 +33,16 @@ export default function Home() {
           </div>
           <div style={card}>
             <h3 style={h3}>Dashboard</h3>
-            <p style={p}>Your saved recipes and recents (coming soon).</p>
+            <p style={p}>Login (or signup) to view your saved recipes!</p>
             <NavLink className="nav-pill" to="/dashboard">
               Open
             </NavLink>
           </div>
           <div style={card}>
             <h3 style={h3}>About</h3>
-            <p style={p}>What we’re building and the plan for Sprint 2.</p>
+            <p style={p}>
+              What ChompList is about and the stages of building it.
+            </p>
             <NavLink className="nav-pill" to="/about">
               Learn more
             </NavLink>
