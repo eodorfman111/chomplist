@@ -36,7 +36,6 @@ def insert_csv_data(db_path: Path, csv_path: Path):
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # check if table has any rows already
     cursor.execute("SELECT COUNT(*) FROM recipes;")
     (count,) = cursor.fetchone()
     if count > 0:
@@ -46,7 +45,6 @@ def insert_csv_data(db_path: Path, csv_path: Path):
 
     df = pd.read_csv(csv_path)
 
-    # assume df has columns: id, name, ingredients, instructions
     for _, row in df.iterrows():
         cursor.execute(
             """
