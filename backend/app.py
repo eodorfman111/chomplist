@@ -13,12 +13,11 @@ from db import (
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "recipes.db"
-CSV_PATH = BASE_DIR / "recipes.csv"   # adjust if your CSV lives elsewhere
+CSV_PATH = BASE_DIR / "recipes.csv"
 
 def create_app():
     app = Flask(__name__)
 
-    # CORS for Vite dev server + generic local origins
     CORS(
         app,
         resources={r"/api/*": {"origins": [
@@ -29,18 +28,15 @@ def create_app():
         ]}},
     )
 
-    # --- DB init on first run only ---
     if not DB_PATH.exists():
         print("Database not found, creating and loading from CSV...")
         create_database(DB_PATH)
         if CSV_PATH.exists():
             insert_csv_data(DB_PATH, CSV_PATH)
         else:
-            print(f"WARNING: CSV file not found at {CSV_PATH}, database will be empty.")
+            print(f"WARNING: CSV file not found.")
     else:
-        print("Database already exists, skipping creation and CSV import.")
-
-    # ---------- ROUTES ----------
+        print("Database already exists, skipping creation.")
 
     @app.route("/api/health", methods=["GET"])
     def health():
