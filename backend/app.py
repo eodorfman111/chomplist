@@ -69,5 +69,4 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    # host 0.0.0.0 so it works in Docker/WSL if you do that later
     app.run(host="0.0.0.0", port=5001, debug=True)
